@@ -1,23 +1,20 @@
 import { Client } from "discord.js";
-import path from "path";
-import fs from "fs";
-
-const eventsDir = path.join(__dirname, "..", "events");
-
-const eventFiles = fs
-  .readdirSync(eventsDir)
-  .filter((file) => file.endsWith(".ts"));
+import { EVENTS } from "../events";
 
 const handleAllEvents = async (client: Client) => {
-  for (const eventFile of eventFiles) {
-    const eventHandlerObj = require(path.join(eventsDir, eventFile)).default;
-    const eventName = eventHandlerObj.event;
-    const once = eventHandlerObj?.once ?? false;
-    const eventHandler = eventHandlerObj.handler;
+  try {
+    for (const event of EVENTS) {
+      const eventName = event.event;
+      const once = event?.once ?? false;
+      const eventHandler = event.handler;
 
-    if (once)
-      client.once(eventName, (...args) => eventHandler(...args, client));
-    else client.on(eventName, (...args) => eventHandler(...args, client));
+      if (once)
+        client.once(eventName, (...args) => eventHandler(...args, client));
+      else client.on(eventName, (...args) => eventHandler(...args, client));
+    }
+  } catch (error: any) {
+    console.log("Error handling all events", error?.message);
+    console.error(error);
   }
 };
 

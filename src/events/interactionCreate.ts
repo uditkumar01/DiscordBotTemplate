@@ -1,9 +1,19 @@
-import { Client, Interaction } from "discord.js";
+import { ChatInputCommandInteraction, Client } from "discord.js";
+import { COMMAND_HANDLERS } from "../commands";
+import { IEvent } from "../types";
 
-const eventData = {
+const eventData: IEvent = {
   event: "interactionCreate",
-  handler: async (interaction: Interaction, client: Client) => {
-    console.log(interaction.type);
+  handler: async (interaction: ChatInputCommandInteraction, client: Client) => {
+    if (!interaction.isChatInputCommand()) return;
+    if (!client?.user) return;
+
+    const { commandName } = interaction;
+
+    const callback = COMMAND_HANDLERS?.[commandName];
+    if (!callback) interaction.reply("Unknown command");
+
+    await callback(interaction, client);
   },
 };
 

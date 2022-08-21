@@ -1,10 +1,10 @@
-import dotenv from "dotenv";
-import { Client, GatewayIntentBits } from "discord.js";
+import { Client, GatewayIntentBits, Routes } from "discord.js";
+import { REST } from "@discordjs/rest";
 import handleAllEvents from "./functions/handleAllEvents";
+import envs from "./constants";
+import refreshCommands from "./functions/handleAllCommands";
 
-dotenv.config();
-
-const { BOT_TOKEN } = process.env;
+const { BOT_TOKEN, CLIENT_ID, GUILD_ID } = envs;
 
 const client = new Client({
   intents: [
@@ -14,7 +14,14 @@ const client = new Client({
   ],
 });
 
+const rest = new REST({
+  version: "10",
+}).setToken(BOT_TOKEN);
+
 // to handle all events
 handleAllEvents(client);
+
+// Refresh application (/) commands
+refreshCommands(rest);
 
 client.login(BOT_TOKEN);
